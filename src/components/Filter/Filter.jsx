@@ -2,7 +2,7 @@ import React from 'react';
 import { Label, Input } from './Filter-styled';
 import PropTypes from 'prop-types';
 
-export const Filter = ({ value, onChange }) => {
+export const Filter = ({ onChange, value }) => {
   return (
     <Label>
       Search

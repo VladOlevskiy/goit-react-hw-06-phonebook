@@ -1,47 +1,22 @@
 import React from 'react';
-import { nanoid } from 'nanoid';
 import { Box } from './Box/Box';
 import { ContactForm } from './ContactForm/ContactForm ';
 import { ContactList } from './ContactList/ContactList';
 import { Filter } from './Filter/Filter';
-import PropTypes from 'prop-types';
 import { FcPhoneAndroid } from 'react-icons/fc';
-import { useState } from 'react';
-import { useEffect } from 'react';
+import { useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
+import { foundedContact } from '../redux/filterSlice';
+import { getFilter } from '../redux/filterSlice';
+import { getContacts } from '../redux/contactsSlice';
 
 export const App = () => {
-  const [contacts, SetContacts] = useState(() => {
-    return JSON.parse(localStorage.getItem('contacts')) ?? [];
-  });
-  const [filter, SetFilter] = useState('');
-
-  useEffect(() => {
-    localStorage.setItem('contacts', JSON.stringify(contacts));
-  }, [contacts]);
-
-  const onSubmit = values => {
-    const id = nanoid();
-    if (
-      contacts.some(
-        contact => contact.name.toLowerCase() === values.name.toLowerCase()
-      )
-    ) {
-      return alert(`${values.name} is already in contacts.`);
-    }
-
-    const newValues = { id: id, ...values };
-
-    SetContacts(prevState => {
-      return [newValues, ...prevState];
-    });
-  };
-
-  const deleteContact = contactID => {
-    SetContacts(contacts.filter(contact => contact.id !== contactID));
-  };
+  const contacts = useSelector(getContacts);
+  const filter = useSelector(getFilter);
+  const dispatch = useDispatch();
 
   const onChange = e => {
-    SetFilter(e.currentTarget.value);
+    dispatch(foundedContact(e.currentTarget.value));
   };
 
   const normalizedFilterSearch = filter.toLowerCase();
@@ -49,7 +24,6 @@ export const App = () => {
   const FoundedContact = contacts.filter(contact =>
     contact.name.toLowerCase().includes(normalizedFilterSearch)
   );
-
   return (
     <>
       <Box paddingBottom="30px" paddingTop="30px">
@@ -70,19 +44,15 @@ export const App = () => {
             <FcPhoneAndroid size={25} />
             Phonebook
           </h1>
-          <ContactForm onSubmit={onSubmit} />
+          <ContactForm />
           <h2>Contacts</h2>
           {contacts.length >= 1 && (
-            <Filter value={filter} onChange={onChange} />
+            <Filter onChange={onChange} value={filter} />
+            //  }
           )}
-          <ContactList contact={FoundedContact} onDelete={deleteContact} />
+          <ContactList contact={FoundedContact} />
         </Box>
       </Box>
     </>
   );
-};
-
-App.propTypes = {
-  contacts: PropTypes.array,
-  value: PropTypes.string,
 };

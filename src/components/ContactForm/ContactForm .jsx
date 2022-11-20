@@ -2,7 +2,11 @@ import React from 'react';
 import { Formik, ErrorMessage } from 'formik';
 import { Form, Label, Field, Button } from './ContactForm-styled';
 import * as yup from 'yup';
-import PropTypes from 'prop-types';
+import { useDispatch } from 'react-redux';
+import { addContacts } from '../../redux/contactsSlice';
+import { nanoid } from 'nanoid';
+import { useSelector } from 'react-redux';
+import { getContacts } from '../../redux/contactsSlice';
 
 yup.addMethod(yup.string, 'numeric', function () {
   return this.matches(/^\d+$/, 'The field should have digits only');
@@ -18,9 +22,20 @@ const initialValues = {
   number: '',
 };
 
-export const ContactForm = ({ onSubmit }) => {
+export const ContactForm = () => {
+  const dispatch = useDispatch();
+  const contacts = useSelector(getContacts);
+
   const handleSubmit = (values, { resetForm }) => {
-    onSubmit(values);
+    const id = nanoid();
+    if (
+      contacts.some(
+        contact => contact.name.toLowerCase() === values.name.toLowerCase()
+      )
+    ) {
+      return alert(`${values.name} is already in contacts.`);
+    }
+    dispatch(addContacts({ id: id, ...values }));
     resetForm();
   };
 
@@ -57,12 +72,4 @@ export const ContactForm = ({ onSubmit }) => {
       </Form>
     </Formik>
   );
-};
-
-ContactForm.propTypes = {
-  initialValues: PropTypes.shape({
-    name: PropTypes.string.isRequired,
-    number: PropTypes.number.isRequired,
-  }),
-  onSubmit: PropTypes.func.isRequired,
 };
